@@ -1,3 +1,23 @@
+use regex::{Regex};
+
+#[derive(Debug)]
+struct Operation {
+    left: i32,
+    operator: char,
+    right: i32,
+}
+
+impl Operation {
+    fn from_string(input: &String) -> Option<Operation> {
+        let regex = Regex::new(r"^\s*(\d+)\s*([+])\s*(\d+)\s*$").unwrap();
+
+        regex.captures(&input).map(|capture| Operation {
+            left: (&capture[1]).parse().unwrap(),
+            operator: (&capture[2]).parse().unwrap(),
+            right: (&capture[3]).parse().unwrap(),
+        })
+    }
+}
 
 fn main() {
     println!("Please enter a calculation");
@@ -8,16 +28,13 @@ fn main() {
         .read_line(&mut input)
         .expect("Could not read line");
 
-    let parts: Vec<i32> = input.split(['+'])
-        .map(|x| x.trim().parse().expect("Only numbers are allowed"))
-        .collect();
+    let operation = Operation::from_string(&input).expect("Your input is invalid");
 
-    if parts.len() != 2 {
-        panic!("Currently only + is a supported operator")
-    }
+    let result = match operation {
+        Operation { left, operator: '+', right } => Ok(left + right),
+        x => Err(format!("{} is not a valid operator", x.operator)),
+    };
 
 
-    println!("Parts: {:?}", &parts);
-
-    println!("{} + {} = {}", parts[0], parts[1], parts.iter().sum::<i32>())
+    println!("The result is: {:?}", result.unwrap());
 }
