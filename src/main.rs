@@ -9,7 +9,7 @@ struct Operation {
 
 impl Operation {
     fn from_string(input: &String) -> Option<Operation> {
-        let regex = Regex::new(r"^\s*(\d+)\s*([+])\s*(\d+)\s*$").unwrap();
+        let regex = Regex::new(r"^\s*(\d+)\s*([+\-*/])\s*(\d+)\s*$").unwrap();
 
         regex.captures(&input).map(|capture| Operation {
             left: (&capture[1]).parse().unwrap(),
@@ -32,6 +32,9 @@ fn main() {
 
     let result = match operation {
         Operation { left, operator: '+', right } => Ok(left + right),
+        Operation { left, operator: '-', right } => Ok(left - right),
+        Operation { left, operator: '*', right } => Ok(left * right),
+        Operation { left, operator: '/', right } => Ok(left / right),
         x => Err(format!("{} is not a valid operator", x.operator)),
     };
 
