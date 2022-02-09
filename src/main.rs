@@ -17,6 +17,16 @@ impl Operation {
             right: (&capture[3]).parse().unwrap(),
         })
     }
+
+    fn execute(&self) -> Result<i32, String> {
+        match self {
+            Operation { left, operator: '+', right } => Ok(left + right),
+            Operation { left, operator: '-', right } => Ok(left - right),
+            Operation { left, operator: '*', right } => Ok(left * right),
+            Operation { left, operator: '/', right } => Ok(left / right),
+            x => Err(format!("{} is not a valid operator", x.operator)),
+        }
+    }
 }
 
 fn main() {
@@ -30,13 +40,7 @@ fn main() {
 
     let operation = Operation::from_string(&input).expect("Your input is invalid");
 
-    let result = match operation {
-        Operation { left, operator: '+', right } => Ok(left + right),
-        Operation { left, operator: '-', right } => Ok(left - right),
-        Operation { left, operator: '*', right } => Ok(left * right),
-        Operation { left, operator: '/', right } => Ok(left / right),
-        x => Err(format!("{} is not a valid operator", x.operator)),
-    };
+    let result = operation.execute();
 
 
     println!("The result is: {:?}", result.unwrap());
