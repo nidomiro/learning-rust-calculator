@@ -33,17 +33,36 @@ impl Operation {
 }
 
 fn main() {
-    println!("Please enter a calculation");
+    loop {
+        println!("Please enter a calculation (or quit to exit)");
 
-    let mut input = String::new();
-    std::io::stdin()
-        .read_line(&mut input)
-        .expect("Could not read line");
+        let mut input = String::new();
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Could not read line");
 
-    let operation = Operation::from_string(&input).expect("Your input is invalid");
+        if input.trim().eq("quit") {
+            println!("exiting...");
+            break
+        }
 
-    let result = operation.execute();
+        let operation = match Operation::from_string(&input) {
+            None => {
+                println!("Your input was invalid");
+                continue
+            },
+            Some(x) => x
+        };
+
+        let result = match operation.execute() {
+            Err(InvalidOperatorError { operator: op}) => {
+                println!("The operator {} is invalid", op);
+                continue
+            },
+            Ok(x) => x
+        };
 
 
-    println!("The result is: {}", result.unwrap());
+        println!("The result is: {}", result);
+    }
 }
