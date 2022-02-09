@@ -1,6 +1,9 @@
 use regex::{Regex};
 
 #[derive(Debug)]
+struct InvalidOperatorError { operator: char }
+
+#[derive(Debug)]
 struct Operation {
     left: i32,
     operator: char,
@@ -18,13 +21,13 @@ impl Operation {
         })
     }
 
-    fn execute(&self) -> Result<i32, String> {
+    fn execute(&self) -> Result<i32, InvalidOperatorError> {
         match self {
             Operation { left, operator: '+', right } => Ok(left + right),
             Operation { left, operator: '-', right } => Ok(left - right),
             Operation { left, operator: '*', right } => Ok(left * right),
             Operation { left, operator: '/', right } => Ok(left / right),
-            x => Err(format!("{} is not a valid operator", x.operator)),
+            x => Err(InvalidOperatorError {operator: x.operator}),
         }
     }
 }
@@ -33,7 +36,6 @@ fn main() {
     println!("Please enter a calculation");
 
     let mut input = String::new();
-
     std::io::stdin()
         .read_line(&mut input)
         .expect("Could not read line");
@@ -43,5 +45,5 @@ fn main() {
     let result = operation.execute();
 
 
-    println!("The result is: {:?}", result.unwrap());
+    println!("The result is: {}", result.unwrap());
 }
