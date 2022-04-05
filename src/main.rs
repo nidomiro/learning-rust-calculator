@@ -1,14 +1,12 @@
 use regex::{Captures, Regex};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum MathStringParseError {
     NotParsable,
-    InvalidOperatorError {
-        operator: char,
-    }
+    InvalidOperatorError { operator: char },
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum Operation {
     Number(f64),
     Addition {
@@ -30,7 +28,9 @@ enum Operation {
 }
 
 impl Operation {
-    fn from_string(input: &String) -> Result<Operation, MathStringParseError> {
+    /// Constructs an Operation from an String
+    /// By now only one operator is supported
+    fn from_string(input: &str) -> Result<Operation, MathStringParseError> {
         let regex = Regex::new(r"^\s*(\d+)\s*(\S)\s*(\d+)\s*$").unwrap();
 
         fn from_capture(capture: Captures) -> Result<Operation, MathStringParseError> {
@@ -54,25 +54,32 @@ impl Operation {
                     dividend: Box::new(Operation::Number(left_side)),
                     divisor: Box::new(Operation::Number(right_side)),
                 }),
-                x => Err(MathStringParseError::InvalidOperatorError {
-                    operator: x,
-                }),
+                x => Err(MathStringParseError::InvalidOperatorError { operator: x }),
             }
         }
 
         match regex.captures(&input) {
             None => Err(MathStringParseError::NotParsable),
-            Some(capture) => from_capture(capture)
+            Some(capture) => from_capture(capture),
         }
     }
 
     fn execute(&self) -> f64 {
         match self {
             Operation::Number(x) => *x,
-            Operation::Addition {left_addend, right_addend} => left_addend.execute() + right_addend.execute(),
-            Operation::Subtraction {minuend, subtrahend} => minuend.execute() - subtrahend.execute(),
-            Operation::Multiplication {multiplicand, multiplier} => multiplicand.execute() * multiplier.execute(),
-            Operation::Division {dividend, divisor} => dividend.execute() * divisor.execute(),
+            Operation::Addition {
+                left_addend,
+                right_addend,
+            } => left_addend.execute() + right_addend.execute(),
+            Operation::Subtraction {
+                minuend,
+                subtrahend,
+            } => minuend.execute() - subtrahend.execute(),
+            Operation::Multiplication {
+                multiplicand,
+                multiplier,
+            } => multiplicand.execute() * multiplier.execute(),
+            Operation::Division { dividend, divisor } => dividend.execute() / divisor.execute(),
         }
     }
 }
@@ -95,8 +102,8 @@ fn main() {
             Err(MathStringParseError::NotParsable) => {
                 println!("Your input was invalid");
                 continue;
-            },
-            Err(MathStringParseError::InvalidOperatorError {operator}) => {
+            }
+            Err(MathStringParseError::InvalidOperatorError { operator }) => {
                 println!("{} is an invalid operator", operator);
                 continue;
             }
@@ -106,5 +113,91 @@ fn main() {
         let result = operation.execute();
 
         println!("The result is: {}", result);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    // copied from https://stackoverflow.com/a/34666891/1469540
+    macro_rules! operation_from_string_test {
+        ($($name:ident: $value:expr,)*) => {
+            $(
+                #[test]
+                fn $name() {
+                    let (input, expected) = $value;
+                    assert_eq!(Operation::from_string(input), expected);
+                }
+            )*
+            }
+    }
+
+    operation_from_string_test! {
+        simple_addition: ("1+2", Ok(Operation::Addition {
+            left_addend: Box::new(Operation::Number(1.0)),
+            right_addend: Box::new(Operation::Number(2.0))
+        })),
+        simple_subtraction: ("1-2", Ok(Operation::Subtraction {
+            minuend: Box::new(Operation::Number(1.0)),
+            subtrahend: Box::new(Operation::Number(2.0))
+        })),
+        simple_multiplication: ("1*2", Ok(Operation::Multiplication {
+            multiplicand: Box::new(Operation::Number(1.0)),
+            multiplier: Box::new(Operation::Number(2.0))
+        })),
+        simple_division: ("1/2", Ok(Operation::Division {
+            dividend: Box::new(Operation::Number(1.0)),
+            divisor: Box::new(Operation::Number(2.0))
+        })),
+    }
+
+    #[test]
+    fn exec_simple_addition() {
+        assert_eq!(
+            Operation::Addition {
+                left_addend: Box::new(Operation::Number(1.0)),
+                right_addend: Box::new(Operation::Number(2.0))
+            }
+            .execute(),
+            3.0
+        )
+    }
+
+    #[test]
+    fn exec_simple_subtraction() {
+        assert_eq!(
+            Operation::Subtraction {
+                minuend: Box::new(Operation::Number(1.0)),
+                subtrahend: Box::new(Operation::Number(2.0))
+            }
+            .execute(),
+            -1.0
+        )
+    }
+
+    #[test]
+    fn exec_simple_multiplication() {
+        assert_eq!(
+            Operation::Multiplication {
+                multiplicand: Box::new(Operation::Number(1.0)),
+                multiplier: Box::new(Operation::Number(2.0))
+            }
+            .execute(),
+            2.0
+        )
+    }
+
+    #[test]
+    fn exec_simple_division() {
+        assert_eq!(
+            Operation::Division {
+                dividend: Box::new(Operation::Number(1.0)),
+                divisor: Box::new(Operation::Number(2.0))
+            }
+            .execute(),
+            0.5
+        )
     }
 }
