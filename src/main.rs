@@ -39,20 +39,20 @@ impl Operation {
             let right_side: f64 = (&capture[3]).parse().unwrap();
             match operator {
                 '+' => Ok(Operation::Addition {
-                    left_addend: Box::new(Operation::Number(left_side)),
-                    right_addend: Box::new(Operation::Number(right_side)),
+                    left_addend: Operation::Number(left_side).into(),
+                    right_addend: Operation::Number(right_side).into(),
                 }),
                 '-' => Ok(Operation::Subtraction {
-                    minuend: Box::new(Operation::Number(left_side)),
-                    subtrahend: Box::new(Operation::Number(right_side)),
+                    minuend: Operation::Number(left_side).into(),
+                    subtrahend: Operation::Number(right_side).into(),
                 }),
                 '*' => Ok(Operation::Multiplication {
-                    multiplicand: Box::new(Operation::Number(left_side)),
-                    multiplier: Box::new(Operation::Number(right_side)),
+                    multiplicand: Operation::Number(left_side).into(),
+                    multiplier: Operation::Number(right_side).into(),
                 }),
                 '/' => Ok(Operation::Division {
-                    dividend: Box::new(Operation::Number(left_side)),
-                    divisor: Box::new(Operation::Number(right_side)),
+                    dividend: Operation::Number(left_side).into(),
+                    divisor: Operation::Number(right_side).into(),
                 }),
                 x => Err(MathStringParseError::InvalidOperatorError { operator: x }),
             }
@@ -136,20 +136,20 @@ mod tests {
 
     operation_from_string_test! {
         simple_addition: ("1+2", Ok(Operation::Addition {
-            left_addend: Box::new(Operation::Number(1.0)),
-            right_addend: Box::new(Operation::Number(2.0))
+            left_addend: Number(1.0).into(),
+            right_addend: Number(2.0).into()
         })),
         simple_subtraction: ("1-2", Ok(Operation::Subtraction {
-            minuend: Box::new(Operation::Number(1.0)),
-            subtrahend: Box::new(Operation::Number(2.0))
+            minuend: Number(1.0).into(),
+            subtrahend: Number(2.0).into()
         })),
         simple_multiplication: ("1*2", Ok(Operation::Multiplication {
-            multiplicand: Box::new(Operation::Number(1.0)),
-            multiplier: Box::new(Operation::Number(2.0))
+            multiplicand: Number(1.0).into(),
+            multiplier: Number(2.0).into()
         })),
         simple_division: ("1/2", Ok(Operation::Division {
-            dividend: Box::new(Operation::Number(1.0)),
-            divisor: Box::new(Operation::Number(2.0))
+            dividend: Number(1.0).into(),
+            divisor: Number(2.0).into()
         })),
     }
 
@@ -157,8 +157,8 @@ mod tests {
     fn exec_simple_addition() {
         assert_eq!(
             Operation::Addition {
-                left_addend: Box::new(Operation::Number(1.0)),
-                right_addend: Box::new(Operation::Number(2.0))
+                left_addend: Operation::Number(1.0).into(),
+                right_addend: Operation::Number(2.0).into()
             }
             .execute(),
             3.0
@@ -169,8 +169,8 @@ mod tests {
     fn exec_simple_subtraction() {
         assert_eq!(
             Operation::Subtraction {
-                minuend: Box::new(Operation::Number(1.0)),
-                subtrahend: Box::new(Operation::Number(2.0))
+                minuend: Operation::Number(1.0).into(),
+                subtrahend: Operation::Number(2.0).into()
             }
             .execute(),
             -1.0
@@ -181,8 +181,8 @@ mod tests {
     fn exec_simple_multiplication() {
         assert_eq!(
             Operation::Multiplication {
-                multiplicand: Box::new(Operation::Number(1.0)),
-                multiplier: Box::new(Operation::Number(2.0))
+                multiplicand: Operation::Number(1.0).into(),
+                multiplier: Operation::Number(2.0).into()
             }
             .execute(),
             2.0
@@ -193,8 +193,8 @@ mod tests {
     fn exec_simple_division() {
         assert_eq!(
             Operation::Division {
-                dividend: Box::new(Operation::Number(1.0)),
-                divisor: Box::new(Operation::Number(2.0))
+                dividend: Operation::Number(1.0).into(),
+                divisor: Operation::Number(2.0).into()
             }
             .execute(),
             0.5
